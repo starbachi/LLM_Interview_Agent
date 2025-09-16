@@ -1,0 +1,13 @@
+streamlit
+streamlit-audiorecorder
+fastapi
+uvicorn
+requests
+openai
+google-cloud-speech
+google-cloud-texttospeech
+python-dotenv
+langchain
+langchain-community
+pydub
+PyYAML
