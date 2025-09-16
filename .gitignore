@@ -1,3 +1,17 @@
+venv/
 api.env
-/venv
+__pycache__/
+.env
+api.env
+/api
 *.docx
+*.mp3
+*.wav
+*.raw
+
+# Ignore all reports
+interview_report_*.html
+
+# Keep the template
+!interview_report_template.html
+
