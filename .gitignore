@@ -7,14 +7,17 @@ venv/
 .env
 api.env
 
-# Produced media files
+# Produced files
 *.docx
+*.odt
 *.mp3
 *.wav
 *.raw
-
-# Ignore all reports
+*.log
 interview_report_*.html
+
+# Interview config file
+interview_config.json
 
 # Keep the template
 !interview_report_template.html

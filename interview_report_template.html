@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Report - {{position}} at {{company}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1f77b4 0%, #17a2b8 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #1f77b4;
+        }
+        
+        .section h2 {
+            color: #1f77b4;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .job-info {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-left: none;
+        }
+        
+        .job-info h2 {
+            color: white;
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+            color: white;
+            border-left: none;
+            text-align: center;
+        }
+        
+        .score-card h2 {
+            color: white;
+            justify-content: center;
+        }
+        
+        .score-number {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .transcript-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #dee2e6;
+        }
+        
+        .question {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        
+        .answer {
+            background: #f1f8e9;
+            border-left-color: #4caf50;
+        }
+        
+        .greeting {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        
+        .transcript-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .recommendation {
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 2rem 0;
+        }
+        
+        .recommend-hire {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .recommend-review {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+        }
+        
+        .recommend-reject {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+            color: white;
+        }
+        
+        .metadata {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .skill-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1f77b4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(31, 119, 180, 0.4);
+            transition: transform 0.2s;
+        }
+        
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(31, 119, 180, 0.6);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .content {
+                padding: 1rem;
+            }
+            .print-btn {
+                position: static;
+                display: block;
+                margin: 1rem auto;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📋 Interview Report</h1>
+            <p>{{position}} at {{company}}</p>
+            <p><small>Generated on {{date}}</small></p>
+        </div>
+        
+        <div class="content">
+            <!-- Job Information -->
+            <div class="section job-info">
+                <h2>🏢 Position Details</h2>
+                <div class="skills-grid">
+                    <div class="skill-item">
+                        <strong>Department</strong><br>
+                        {{department}}
+                    </div>
+                    <div class="skill-item">
+                        <strong>Level</strong><br>
+                        {{level}}
+                    </div>
+                    <div class="skill-item">
+                        <strong>Duration</strong><br>
+                        {{duration}} minutes
+                    </div>
+                </div>
+                <p style="margin-top: 1rem;"><strong>Required Skills:</strong> {{skills}}</p>
+                <p><strong>Description:</strong> {{job_description}}</p>
+            </div>
+            
+            <!-- Overall Score -->
+            <div class="section score-card">
+                <h2>🎯 Overall Assessment</h2>
+                <div class="score-number">{{overall_score}}/10</div>
+                <p>{{score_description}}</p>
+            </div>
+            
+            <!-- Recommendation -->
+            <div class="recommendation {{recommendation_class}}">
+                🏆 Recommendation: {{recommendation}}
+            </div>
+            
+            <!-- Interview Summary -->
+            <div class="section">
+                <h2>📝 Interview Summary</h2>
+                <div style="white-space: pre-line;">{{interview_summary}}</div>
+            </div>
+            
+            <!-- Technical Skills -->
+            <div class="section">
+                <h2>⚙️ Technical Assessment</h2>
+                <p>{{technical_assessment}}</p>
+            </div>
+            
+            <!-- Communication Skills -->
+            <div class="section">
+                <h2>💬 Communication Assessment</h2>
+                <p>{{communication_assessment}}</p>
+            </div>
+            
+            <!-- Strengths -->
+            <div class="section">
+                <h2>💪 Strengths</h2>
+                <ul>
+                    {{strengths_list}}
+                </ul>
+            </div>
+            
+            <!-- Areas for Improvement -->
+            <div class="section">
+                <h2>📈 Areas for Improvement</h2>
+                <ul>
+                    {{improvements_list}}
+                </ul>
+            </div>
+            
+            <!-- Interview Transcript -->
+            <div class="section">
+                <h2>💭 Interview Transcript</h2>
+                <div id="transcript">
+                    {{transcript_content}}
+                </div>
+            </div>
+            
+            <!-- Metadata -->
+            <div class="metadata">
+                <strong>Report Metadata:</strong><br>
+                Interview Date: {{interview_date}}<br>
+                Report Generated: {{generation_date}}<br>
+                Total Questions: {{total_questions}}<br>
+                Interview ID: {{interview_id}}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Auto-generate table of contents if needed
+        window.addEventListener('load', function() {
+            console.log('Interview report loaded successfully');
+        });
+    </script>
+</body>
+</html>
