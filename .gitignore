@@ -1,9 +1,13 @@
-venv/
-api.env
+# Cache and venv files
 __pycache__/
+venv/
+
+# CONFIDENTIAL - Environment variables files
+/api
 .env
 api.env
-/api
+
+# Produced media files
 *.docx
 *.mp3
 *.wav
