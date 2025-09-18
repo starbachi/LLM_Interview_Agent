@@ -1,0 +1,40 @@
+# Configuration file for Interview Agent
+# Audio debug settings
+audio:
+  debug:
+    enabled: true
+    base_directory: "debug_audio"
+    subdirectories:
+      raw: "raw_input"           # Original audio input files
+      normalized: "normalized"   # Audio after normalization for STT
+      failed: "failed_stt"      # Audio that failed STT processing
+    file_formats:
+      raw_extension: ".raw"
+      wav_extension: ".wav"
+      mp3_extension: ".mp3"
+    retention:
+      max_files: 100            # Maximum number of debug files to keep
+      cleanup_on_startup: false # Whether to clean old files on startup
+
+# Logging configuration
+logging:
+  level: "DEBUG"
+  file: "interview_debug.log"
+  format: "%(asctime)s [%(levelname)s] %(message)s"
+
+# STT configuration
+stt:
+  google:
+    language_code: "en-GB"
+    model: "latest_long"
+    enhanced: true
+    profanity_filter: false
+    enable_automatic_punctuation: true
+    enable_spoken_punctuation: true
+    enable_spoken_emojis: true
+
+# TTS configuration  
+tts:
+  google:
+    language_code: "en-GB"
+    voice_name: "en-GB-Standard-A"
