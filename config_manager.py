@@ -84,8 +84,8 @@ class ConfigManager:
             },
             "tts": {
                 "google": {
-                    "language_code": "en-US",
-                    "voice_name": "en-US-Journey-F"
+                    "language_code": "en-GB",
+                    "voice_name": "en-GB-Standard-A"
                 }
             }
         }

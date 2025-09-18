@@ -305,8 +305,8 @@ def synthesize_tts(text: str, language_code: Optional[str] = None, voice_name: O
         return None
     
     # Use config defaults if not provided
-    if language_code is None: language_code = config.get("tts.google.language_code", "en-US")
-    if voice_name is None: voice_name = config.get("tts.google.voice_name", "en-US-Journey-F")
+    if language_code is None: language_code = config.get("tts.google.language_code", "en-GB")
+    if voice_name is None: voice_name = config.get("tts.google.voice_name", "en-GB-Standard-A")
         
     try:
         # Ensure credentials are loaded
