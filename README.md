@@ -21,25 +21,28 @@ An intelligent interview system that conducts automated job interviews using AI,
 ## Features
 
 **Voice-Enabled Interviews**
-- Real-time audio recording and transcription using Google Cloud Speech-to-Text
+- Toggle-based audio recording and transcription using Google Cloud Speech-to-Text
 - Natural-sounding AI interviewer voice using Google Cloud Text-to-Speech
 - Support for multiple audio formats (WAV, MP3, raw PCM)
 
 **AI-Powered Interviewing**
-- Dynamic question generation using NVIDIA NIM ```Llama 3.1 405B model```
+- Dynamic question generation using NVIDIA NIM ```meta/llama-4-maverick-17b-128e-instruct```
 - Context-aware follow-up questions based on candidate responses
 - Question rephrasing for clarity when requested
 - Adaptive interview flow based on job requirements
+
 **Comprehensive Evaluation**
 - Automated candidate assessment with numerical scoring (1-10)
 - Detailed analysis of technical skills, communication, and problem-solving abilities
 - Identification of strengths and areas for improvement
 - Professional recommendation (Hire/Don't Hire/Further Review)
+
 **Professional Reporting**
 - Beautiful HTML interview reports with professional styling
 - Complete interview transcript with timestamps
 - Downloadable reports for HR teams
 - Mobile-responsive design for viewing on any device
+
 **Configurable Interview Setup**
 - Customizable interview parameters (duration, question count, focus areas)
 - Job-specific configuration through JSON files
@@ -58,73 +61,25 @@ An intelligent interview system that conducts automated job interviews using AI,
     - Text-to-Speech API enabled
     - Service account JSON key file
 2. NVIDIA NIM API Key
-    - Access to Llama 3.1 405B model
+    - Access to Llama 4 Maverick 17b 128e Instruct
 
 ## Installation Steps
 
-**0. Update package management and install FFmpeg**
-
-Debian / Ubuntu / Mint
-```
-sudo apt-get update
-sudo apt-get install ffmpeg
-```
-OR
-```
-sudo apt update
-sudo apt install ffmpeg
-```
-**1. Clone the repository**
+**1. Clone Repository**
 ```
 git clone https://github.com/starbachi/LLM_Interview_Agent
-cd "Interview Agent"
 ```
-
-**2. Create virtual environment**
-
-Linux:
+**2.Run ```setup.sh```**
 ```
-python3 -m venv venv
-source venv/bin/activate
+bash helpers/setup.sh
 ```
-Windows:
-```
-python3 -m venv venv
-source venv/Scripts/activate
-```
-
-**3. Install requirements.txt**
-
-Ensure you are inside (venv)
-```
-pip install -r requirements.txt
-```
-
-**4. Setup API credentials**
-```
-mkdir -p api
-cd api
-```
-Create ```api.env``` file inside ```/api```:
-```
+**3. Setup API credentials**
+Inside ```helpers/api/api.env```, place your API keys.
+Example:
 NVIDIA_API_KEY=your_nvidia_api_key_here
 GOOGLE_APPLICATION_CREDENTIALS=path/to/your/google-credentials.json
-```
-
-**5. Configure interview settings**
-
-Edit ```interview_config.json``` with your job requirements:
-```
-{
-  "position": "Your Job Title",
-  "company": "Your Company Name",
-  "job_description": "Detailed job description...",
-  "required_skills": ["Python", "React", "SQL"],
-  "interview_duration": 20,
-  "question_count": 6,
-  "focus_areas": ["technical_skills", "communication"]
-}
-```
+**4. Configure interview settings**
+Edit ```configs/interview_config.json``` with your job requirements (find example template in the same directory):
 
 ## Run the Application
 ```
@@ -140,7 +95,7 @@ The system follows a modular architecture with clear separation of concerns:
 
 **1. Streamlit Frontend (```streamlit_app.py```)**
 - Interview Management: Handles interview lifecycle (start, progress, completion)
-- Audio Recording: Turn-based audio capture using ```streamlit-audiorecorder``` library
+- Audio Recording: Toggle-based audio capture using ```streamlit-audiorecorder``` library
 - User Interface: Professional, responsive web interface
 - Session Management: Maintains interview state and transcript
 - Progress Tracking: Visual progress indicators and question counters
@@ -150,7 +105,7 @@ The system follows a modular architecture with clear separation of concerns:
 - Conversation Management: Maintains interview flow and context
 - Response Analysis: Processes candidate answers for follow-up questions
 - Evaluation Logic: Generates comprehensive candidate assessments
-- API Integration: Manages communication with NVIDIA NIM ```meta/llama-3.1-405b-instruct```
+- API Integration: Manages communication with NVIDIA NIM ```meta/llama-4-maverick-17b-128e-instruct```
 
 **3. Speech Processing (```stt_tts.py```)**
 - Audio Normalization: Converts various audio formats to Google STT requirements
@@ -160,21 +115,21 @@ The system follows a modular architecture with clear separation of concerns:
 - Debug Support: Audio file logging for troubleshooting
 
 **4. Configuration Manager (```config_manager.py```)**
-- YAML Configuration: Loads settings from ```config.yaml```
+- YAML Configuration: Loads settings from ```configs/config.yaml```
 - Directory Management: Creates and manages debug audio directories
 - API Settings: Manages STT/TTS service configurations
 - Debug Controls: Configurable debug modes and file retention
 
 **5. Report Generator (```html_generator.py```)**
 - HTML Generation: Creates professional interview reports
-- Template Processing: Uses ```interview_report_template.html```
+- Template Processing: Uses ```frontend/interview_report_template.html```
 - Data Extraction: Parses AI evaluation results for structured display
 - Styling: Responsive CSS with professional formatting
 - Export Functions: Generates downloadable reports
 
 ## External Services
 **NVIDIA NIM (Neural Inference Microservices)**
-- Model: Llama 3.1 405B Instruct
+- Model: Lama 4 Maverick 17b 128e Instruct
 - Purpose: Question generation, conversation management, candidate evaluation
 - Features: Advanced reasoning, context awareness, professional assessment
 - API Endpoint: https://integrate.api.nvidia.com/v1/chat/completions
@@ -201,7 +156,7 @@ The system follows a modular architecture with clear separation of concerns:
 5. Completion: Comprehensive evaluation and report generation
 
 **Audio Processing Pipeline**
-1. Capture: Real-time audio recording in web browser
+1. Capture: Toogle-based audio recording in web browser
 2. Format Detection: Automatic detection of WAV vs raw PCM
 3. Normalization: Conversion to Google STT requirements (16kHz, mono, 16-bit)
 4. Transcription: High-accuracy speech recognition with confidence scoring
@@ -212,32 +167,6 @@ The system follows a modular architecture with clear separation of concerns:
 2. Weighted Scoring: Configurable criteria weights in interview config
 3. Context-Aware Analysis: AI considers job requirements and candidate responses
 4. Professional Output: Structured recommendations suitable for HR decisions
-
-## Configuration Files
-Interview Configuration (```configs/interview_config.json```)
-```
-{
-  "position": "Job title",
-  "company": "Company name",
-  "required_skills": ["skill1", "skill2"],
-  "focus_areas": ["technical_skills", "communication"],
-  "evaluation_criteria": {
-    "technical_proficiency": {"weight": 0.4}
-  }
-}
-```
-
-System Configuration (```configs/config.yaml```)
-```
-audio:
-  debug:
-    enabled: true
-    base_directory: "debug_audio"
-stt:
-  google:
-    language_code: "en-GB"
-    model: "latest_long"
-```
 
 ## Debug Features
 Audio Debug Mode
