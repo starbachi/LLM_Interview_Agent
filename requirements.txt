@@ -11,4 +11,3 @@ langchain
 langchain-community
 pydub
 PyYAML
-ffmpeg-python
