@@ -102,9 +102,42 @@
             border-left: 4px solid #dee2e6;
         }
         
+        .transcript-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .transcript-header strong {
+            color: #555;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .timestamp {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: normal;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .transcript-content {
+            line-height: 1.6;
+        }
+        
         .question {
             background: #e3f2fd;
             border-left-color: #2196f3;
+        }
+        
+        .question .timestamp {
+            background: #bbdefb;
+            color: #0d47a1;
         }
         
         .answer {
@@ -112,18 +145,19 @@
             border-left-color: #4caf50;
         }
         
+        .answer .timestamp {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+        
         .greeting {
             background: #fff3e0;
             border-left-color: #ff9800;
         }
         
-        .transcript-item strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .greeting .timestamp {
+            background: #ffe0b2;
+            color: #e65100;
         }
         
         .recommendation {
@@ -171,6 +205,7 @@
             border-radius: 8px;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333; /* Ensure text is dark and visible */
         }
         
         .print-btn {
@@ -224,15 +259,20 @@
                 margin: 1rem auto;
                 width: fit-content;
             }
+            .transcript-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+            }
         }
     </style>
 </head>
 <body>
-    <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
+    <button class="print-btn" onclick="window.print()">Print Report</button>
     
     <div class="container">
         <div class="header">
-            <h1>📋 Interview Report</h1>
+            <h1>Interview Report</h1>
             <p>{{position}} at {{company}}</p>
             <p><small>Generated on {{date}}</small></p>
         </div>
@@ -240,7 +280,7 @@
         <div class="content">
             <!-- Job Information -->
             <div class="section job-info">
-                <h2>🏢 Position Details</h2>
+                <h2>Position Details</h2>
                 <div class="skills-grid">
                     <div class="skill-item">
                         <strong>Department</strong><br>
@@ -261,37 +301,37 @@
             
             <!-- Overall Score -->
             <div class="section score-card">
-                <h2>🎯 Overall Assessment</h2>
+                <h2>Overall Assessment</h2>
                 <div class="score-number">{{overall_score}}/10</div>
                 <p>{{score_description}}</p>
             </div>
             
             <!-- Recommendation -->
             <div class="recommendation {{recommendation_class}}">
-                🏆 Recommendation: {{recommendation}}
+                Recommendation: {{recommendation}}
             </div>
             
             <!-- Interview Summary -->
             <div class="section">
-                <h2>📝 Interview Summary</h2>
+                <h2>Interview Summary</h2>
                 <div style="white-space: pre-line;">{{interview_summary}}</div>
             </div>
             
             <!-- Technical Skills -->
             <div class="section">
-                <h2>⚙️ Technical Assessment</h2>
+                <h2>Technical Assessment</h2>
                 <p>{{technical_assessment}}</p>
             </div>
             
             <!-- Communication Skills -->
             <div class="section">
-                <h2>💬 Communication Assessment</h2>
+                <h2>Communication Assessment</h2>
                 <p>{{communication_assessment}}</p>
             </div>
             
             <!-- Strengths -->
             <div class="section">
-                <h2>💪 Strengths</h2>
+                <h2>Strengths</h2>
                 <ul>
                     {{strengths_list}}
                 </ul>
@@ -299,7 +339,7 @@
             
             <!-- Areas for Improvement -->
             <div class="section">
-                <h2>📈 Areas for Improvement</h2>
+                <h2>Areas for Improvement</h2>
                 <ul>
                     {{improvements_list}}
                 </ul>
@@ -307,7 +347,7 @@
             
             <!-- Interview Transcript -->
             <div class="section">
-                <h2>💭 Interview Transcript</h2>
+                <h2>Interview Transcript</h2>
                 <div id="transcript">
                     {{transcript_content}}
                 </div>

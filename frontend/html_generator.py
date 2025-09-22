@@ -1,48 +1,22 @@
-import time, re
+import time, re, markdown
 from datetime import datetime
 from typing import Dict, Any, Optional
 
 def markdown_to_html(text: str) -> str:
-    """Convert basic markdown formatting to HTML"""
+    """Convert markdown formatting to HTML using the markdown library"""
     if not text or not isinstance(text, str):
         return text
     
-    # Convert bold text (**text** or __text__)
-    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
-    text = re.sub(r'__(.*?)__', r'<strong>\1</strong>', text)
+    # Create markdown instance with useful extensions
+    md = markdown.Markdown(extensions=[
+        'extra',      # Includes tables, fenced code blocks, etc.
+        'nl2br',      # Convert newlines to <br> tags
+        'sane_lists'  # Better list handling
+    ])
     
-    # Convert italic text (*text* or _text_)
-    text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
-    text = re.sub(r'_(.*?)_', r'<em>\1</em>', text)
-    
-    # Convert bullet points
-    lines = text.split('\n')
-    in_list = False
-    converted_lines = []
-    
-    for line in lines:
-        stripped = line.strip()
-        if stripped.startswith('* ') or stripped.startswith('- '):
-            if not in_list:
-                converted_lines.append('<ul>')
-                in_list = True
-            content = stripped[2:].strip()
-            converted_lines.append(f'<li>{content}</li>')
-        else:
-            if in_list:
-                converted_lines.append('</ul>')
-                in_list = False
-            if stripped:
-                converted_lines.append(f'<p>{stripped}</p>')
-            else:
-                converted_lines.append('<br>')
-    
-    if in_list:
-        converted_lines.append('</ul>')
-    
-    return '\n'.join(converted_lines)
+    return md.convert(text)
 
-def generate_html_report(interview_data: Dict[str, Any], template_path: str = "html/interview_report_template.html") -> str:
+def generate_html_report(interview_data: Dict[str, Any], template_path: str = "frontend/interview_report_template.html") -> str:
     """Generate HTML report from interview data"""
     
     try:
