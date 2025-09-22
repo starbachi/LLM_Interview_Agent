@@ -3,69 +3,62 @@
 # AI Interview Assistant Setup Script
 echo "Setting up AI Interview Assistant..."
 
-# Ensure we're in project root
-cd "$(dirname "$0")"
-
-# Check for virtual environment
-if [[ -n "$VIRTUAL_ENV" ]]; then
+# Check if we're in a virtual environment
+if [[ "$VIRTUAL_ENV" != "" ]]; then
     echo "[OK] - Virtual environment detected: $VIRTUAL_ENV"
 else
-    if [[ ! -d "venv" ]]; then
-        echo "[INFO] - No virtual environment found. Creating one..."
-        python3 -m venv venv
-    fi
-    source venv/bin/activate
-    echo "[OK] - Virtual environment activated: $(pwd)/venv"
+    echo "[WARNING] - No virtual environment detected. Creating one..."
+    python3 -m venv venv
+    echo "[INFO] - Virtual environment created and activated"
 fi
 
-# Upgrade pip
-python -m pip install --upgrade pip
+source venv/bin/activate
 
-# Install system dependencies (Debian/Ubuntu only)
-if command -v apt-get &> /dev/null; then
-    echo "[INFO] - Installing system dependencies..."
-    sudo apt-get update
-    sudo apt-get install -y ffmpeg
-fi
+# Install system dependencies
+echo "[INFO] - Installing system dependencies..."
+sudo apt-get update
+sudo apt-get install -y ffmpeg
 
 # Check if ffmpeg is installed
 if command -v ffmpeg &> /dev/null; then
     echo "[OK] - ffmpeg installed successfully"
 else
-    echo "[WARNING] - ffmpeg not found. Please install manually."
+    echo "[ERROR] - ffmpeg installation failed"
 fi
 
 # Install Python packages
 echo "[INFO] - Installing Python packages..."
-pip install -r ../requirements.txt
+pip install -r requirements.txt
 
 # Check API configuration
 echo "[INFO] - Checking API configuration..."
 echo "/----------------------------------------/"
 
-if [[ -f "api/api.env" ]]; then
-    source api/api.env
-
-    [[ -z "$NVIDIA_API_KEY" ]] && \
-      echo "[ERROR] - NVIDIA_API_KEY not set in api/api.env" || \
-      echo "[OK] - NVIDIA_API_KEY found"
-
-    if [[ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]]; then
-        echo "[ERROR] - GOOGLE_APPLICATION_CREDENTIALS not set in api/api.env"
-    elif [[ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]]; then
-        echo "[OK] - Google Cloud credentials file found"
+if [ -f "helper/api.env" ]; then
+    source helper/api.env
+    if [ -z "$NVIDIA_API_KEY" ]; then
+        echo "[ERROR] - NVIDIA_API_KEY not set in helper/api.env | Please add your NVIDIA API key to helper/api.env file"
     else
-        echo "[ERROR] - Google Cloud credentials file not found at: $GOOGLE_APPLICATION_CREDENTIALS"
+        echo "[OK] - NVIDIA API key found"
+    fi
+    
+    if [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+        echo "[ERROR] - GOOGLE_APPLICATION_CREDENTIALS not set in helper/api.env | Please add your Google Cloud credentials path to helper/api.env file"
+    else
+        if [ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+            echo "[OK] - Google Cloud credentials file found"
+        else
+            echo "[ERROR] - Google Cloud credentials file not found at: $GOOGLE_APPLICATION_CREDENTIALS"
+        fi
     fi
 else
-    echo "[ERROR] - api/api.env file not found"
+    echo "[ERROR] - helper/api.env file not found"
     echo "[INFO] - Creating api directory and template api.env file..."
-    mkdir -p api
-    cat > api/api.env << EOF
+    cd helper
+    cat > helper/api.env << EOF
 NVIDIA_API_KEY=
 GOOGLE_APPLICATION_CREDENTIALS=
 EOF
-    echo "[OK] - Template api/api.env created. Please update with your credentials."
+    echo "[OK] - Template helper/api.env created. Please update with your credentials."
 fi
-
-echo "[INFO] - Setup complete. Run: streamlit run streamlit_app.py"
+echo "[INFO] - If your API credentials are set. Please run: streamlit run streamlit_app.py"
