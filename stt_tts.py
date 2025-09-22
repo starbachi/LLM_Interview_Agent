@@ -109,7 +109,7 @@ def __prepare_audio_for_api(audio_bytes: bytes) -> tuple[bytes, int, int]:
 def __get_google_credentials_json_path():
     """Load Google Cloud credentials from `api.env` file."""
 
-    env_file_path = os.path.join(os.path.dirname(__file__), 'api', 'api.env')
+    env_file_path = os.path.join(os.path.dirname(__file__), 'helpers/api', 'api.env')
     
     if env_file_path is None:
         logger.error("File containing Google Cloud credentials is missing.")

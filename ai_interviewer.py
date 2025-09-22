@@ -105,7 +105,7 @@ class AIInterviewer:
         import os
         from dotenv import load_dotenv
         
-        env_file_path = os.path.join(os.path.dirname(__file__), 'api', 'api.env')
+        env_file_path = os.path.join(os.path.dirname(__file__), 'helpers/api', 'api.env')
         if os.path.exists(env_file_path):
             load_dotenv(env_file_path)
             api_key = os.getenv('NVIDIA_API_KEY')
@@ -114,7 +114,7 @@ class AIInterviewer:
                 return api_key
         
         logger.error("NVIDIA API key not found")
-        raise RuntimeError("NVIDIA_API_KEY not set in api/api.env")
+        raise RuntimeError("NVIDIA_API_KEY not set in helpers/api/api.env")
     
     def _call_nvidia_api(self, message: List[Dict[str, str]], max_tokens: int = 500) -> Optional[str]:
         """

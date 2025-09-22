@@ -34,16 +34,16 @@ pip install -r requirements.txt
 echo "[INFO] - Checking API configuration..."
 echo "/----------------------------------------/"
 
-if [ -f "helper/api.env" ]; then
-    source helper/api.env
+if [ -f "helpers/api/api.env" ]; then
+    source helpers/api/api.env
     if [ -z "$NVIDIA_API_KEY" ]; then
-        echo "[ERROR] - NVIDIA_API_KEY not set in helper/api.env | Please add your NVIDIA API key to helper/api.env file"
+        echo "[ERROR] - NVIDIA_API_KEY not set in helpers/apis/api.env | Please add your NVIDIA API key to helpers/api/api.env file"
     else
         echo "[OK] - NVIDIA API key found"
     fi
     
     if [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
-        echo "[ERROR] - GOOGLE_APPLICATION_CREDENTIALS not set in helper/api.env | Please add your Google Cloud credentials path to helper/api.env file"
+        echo "[ERROR] - GOOGLE_APPLICATION_CREDENTIALS not set in helpers/api/api.env | Please add your Google Cloud credentials path to helpers/api/api.env file"
     else
         if [ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
             echo "[OK] - Google Cloud credentials file found"
@@ -52,13 +52,13 @@ if [ -f "helper/api.env" ]; then
         fi
     fi
 else
-    echo "[ERROR] - helper/api.env file not found"
+    echo "[ERROR] - helpers/api/api.env file not found"
     echo "[INFO] - Creating api directory and template api.env file..."
-    cd helper
-    cat > helper/api.env << EOF
+    cd helpers/api
+    cat > helpers/api/api.env << EOF
 NVIDIA_API_KEY=
 GOOGLE_APPLICATION_CREDENTIALS=
 EOF
-    echo "[OK] - Template helper/api.env created. Please update with your credentials."
+    echo "[OK] - Template helpers/api/api.env created. Please update with your credentials."
 fi
 echo "[INFO] - If your API credentials are set. Please run: streamlit run streamlit_app.py"
