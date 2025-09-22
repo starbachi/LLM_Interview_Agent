@@ -54,7 +54,8 @@ if [ -f "helpers/api/api.env" ]; then
 else
     echo "[ERROR] - helpers/api/api.env file not found"
     echo "[INFO] - Creating api directory and template api.env file..."
-    cd helpers/api
+    mkdir -p helpers/api
+    touch helpers/api/api.env
     cat > helpers/api/api.env << EOF
 NVIDIA_API_KEY=
 GOOGLE_APPLICATION_CREDENTIALS=
