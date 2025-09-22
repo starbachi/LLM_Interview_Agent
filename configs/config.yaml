@@ -1,12 +1,12 @@
-# Configuration file for Interview Agent
+# Back-end configuration file for Interview Agent
 # Audio debug settings
 audio:
   debug:
     enabled: true
     base_directory: "debug_audio"
     subdirectories:
-      raw: "raw_input"           # Original audio input files
-      normalized: "normalized"   # Audio after normalization for STT
+      raw: "raw_input"          # Original audio input files
+      normalized: "normalized"  # Audio after normalization for STT
       failed: "failed_stt"      # Audio that failed STT processing
     file_formats:
       raw_extension: ".raw"
