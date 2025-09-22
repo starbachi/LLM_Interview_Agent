@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ConfigManager:
     """Manages configuration loading and directory setup."""
     
-    def __init__(self, config_path: str = "config.yaml"):
+    def __init__(self, config_path: str = "configs/config.yaml"):
         """
         Initialize the configuration manager.
         
