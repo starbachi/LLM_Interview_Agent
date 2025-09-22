@@ -187,7 +187,7 @@ def __google_stt_from_bytes(audio_bytes: bytes, language_code: str = "en-GB") ->
                 logger.debug(f"result[{i}].transcript='{transcript}' (length={len(transcript)})")
                 
                 # Only include transcripts with confidence > 0 and non-empty content
-                if confidence != 'n/a' and isinstance(confidence, (int, float)) and confidence > 0.0 and transcript.strip():
+                if confidence != 'n/a' and isinstance(confidence, (int, float)) and confidence >= 0.0 and transcript.strip():
                     transcripts.append(transcript)
                 elif transcript.strip():  # Non-empty but low confidence
                     logger.warning(f"Low confidence transcript ignored: Confidence={confidence}, Text='{transcript}'")
@@ -203,7 +203,7 @@ def __google_stt_from_bytes(audio_bytes: bytes, language_code: str = "en-GB") ->
         if not joined.strip():
             logger.warning("Google STT returned only empty/whitespace transcript")
             # Save the exact audio data that was sent to Google STT for analysis
-            if config.is_debug_enabled():
+            if config:
                 now = datetime.now().strftime('%Y%m%d_%H%M%S')
                 try:
                     # Save the exact normalized PCM data that Google STT received
@@ -274,7 +274,7 @@ def transcribe_audio_bytes(audio_bytes: bytes) -> str:
         return f"[STT_ERROR] {e}"
 
     # Save diagnostics for inspection if debug is enabled
-    if config.is_debug_enabled():
+    if config:
         now = datetime.now().strftime('%Y%m%d_%H%M%S')
         try:
             # If bytes look like a WAV (RIFF), save as WAV, else save raw

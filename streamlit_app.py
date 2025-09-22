@@ -1,11 +1,9 @@
+import json, logging, time, tempfile, os
+
 import streamlit as st
-import json
-import logging
-import time
+
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-import tempfile
-import os
+from typing import Dict, Any
 
 from config_manager import config
 from stt_tts import transcribe_audio_bytes, synthesize_tts
@@ -29,18 +27,10 @@ def load_interview_config() -> Dict[str, Any]:
     except FileNotFoundError:
         logger.error(f"Interview config file not found: {config_path}")
         # Return default config
-        return {
-            "position": "Software Engineer",
-            "company": "Tech Company",
-            "job_description": "We are looking for a skilled software engineer to join our team.",
-            "required_skills": ["Python", "JavaScript", "React", "APIs"],
-            "interview_duration": 15,
-            "question_count": 5,
-            "focus_areas": ["technical_skills", "problem_solving", "communication"]
-        }
+        raise RuntimeError("Interview configuration file is missing.")
     except json.JSONDecodeError as e:
         logger.error(f"Invalid JSON in interview config: {e}")
-        return {}
+        raise RuntimeError("Interview configuration file is invalid.")
 
 def initialize_session_state():
     """Initialize Streamlit session state variables."""
@@ -221,7 +211,7 @@ def main():
     """Main Streamlit application."""
     st.set_page_config(
         page_title="AI Interview Assistant",
-        page_icon="🎤",
+        page_icon="",
         layout="wide"
     )
     
@@ -250,7 +240,7 @@ def main():
     initialize_session_state()
     
     # Header
-    st.markdown('<h1 class="main-header">🎤 AI Interview Assistant</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">AI Interview Assistant</h1>', unsafe_allow_html=True)
     
     if not st.session_state.interview_started:
         # Pre-interview setup
@@ -267,7 +257,7 @@ def main():
         
         st.info("Click 'Start Interview' when you're ready to begin. Make sure your microphone is working properly.")
         
-        if st.button("🚀 Start Interview", type="primary"):
+        if st.button("Start Interview", type="primary"):
             start_interview()
             st.rerun()
     
@@ -287,15 +277,15 @@ def main():
                 col_repeat, col_rephrase = st.columns(2)
                 
                 with col_repeat:
-                    if st.button("🔄 Repeat Question"):
+                    if st.button("Repeat Question"):
                         if st.session_state.current_audio and os.path.exists(st.session_state.current_audio):
                             # Force audio replay by resetting the last_audio_played tracking
                             st.session_state.last_audio_played = None
-                            st.success("🔊 Playing question again...")
+                            st.success("Playing question again...")
                             st.rerun()
                 
                 with col_rephrase:
-                    if st.button("🔄 Rephrase Question"):
+                    if st.button("Rephrase Question"):
                         with st.spinner("Rephrasing question..."):
                             rephrase_question()
                         st.rerun()
@@ -320,11 +310,11 @@ def main():
                 wav_audio_data = audiorecorder("Click to record", "Click to stop recording")
                 
                 if wav_audio_data is not None and len(wav_audio_data) > 0:
-                    st.success("✅ Audio recorded successfully!")
+                    st.success("Audio recorded successfully!")
                     # Hide recorded audio playback
                     st.markdown('<div class="recorded-audio" style="display: none;">', unsafe_allow_html=True)
                     st.markdown("</div>", unsafe_allow_html=True)
-                    if st.button("📤 Submit Answer", type="primary"):
+                    if st.button("Submit Answer", type="primary"):
                         # Convert AudioSegment to bytes
                         import io
                         buffer = io.BytesIO()
@@ -338,7 +328,7 @@ def main():
                 # Fallback file upload
                 uploaded_audio = st.file_uploader("Upload your audio answer", type=['wav', 'mp3'])
                 if uploaded_audio is not None:
-                    if st.button("📤 Submit Answer", type="primary"):
+                    if st.button("Submit Answer", type="primary"):
                         audio_bytes = uploaded_audio.read()
                         process_answer(audio_bytes)
         
@@ -349,7 +339,7 @@ def main():
         
         # Transcript display
         if st.session_state.transcript:
-            with st.expander("📝 Interview Transcript", expanded=False):
+            with st.expander("Interview Transcript", expanded=False):
                 for entry in st.session_state.transcript:
                     if entry['type'] == 'greeting':
                         st.markdown('<div class="greeting">', unsafe_allow_html=True)
@@ -369,7 +359,7 @@ def main():
     
     else:
         # Interview completed
-        st.success("🎉 Interview Completed!")
+        st.success("Interview Completed!")
         
         st.markdown("### Interview Summary")
         if hasattr(st.session_state, 'interview_data'):
@@ -377,7 +367,7 @@ def main():
             st.write(summary)
             
             # Generate HTML report
-            if st.button("📄 Generate Detailed Report", type="primary"):
+            if st.button("Generate Detailed Report", type="primary"):
                 with st.spinner("Generating detailed report..."):
                     report_path = save_html_report(st.session_state.interview_data)
                 
@@ -389,7 +379,7 @@ def main():
                         report_content = f.read()
                     
                     st.download_button(
-                        label="💾 Download Report",
+                        label="Download Report",
                         data=report_content,
                         file_name=f"interview_report_{int(time.time())}.html",
                         mime="text/html"
@@ -398,7 +388,7 @@ def main():
                     st.error("Failed to generate report")
         
         # Option to start new interview
-        if st.button("🔄 Start New Interview"):
+        if st.button("Start New Interview"):
             # Reset session state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
