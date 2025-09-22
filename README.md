@@ -71,6 +71,7 @@ git clone https://github.com/starbachi/LLM_Interview_Agent
 ```
 **2.Run ```setup.sh```**
 ```
+cd "Interview Agent"
 bash helpers/setup.sh
 ```
 **3. Setup API credentials**
