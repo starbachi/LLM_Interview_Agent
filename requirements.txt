@@ -6,3 +6,5 @@ pyyaml~=6.0.2
 requests~=2.32.5
 streamlit~=1.49.1
 streamlit-audiorecorder~=0.0.6
+PyYAML~=6.0.2
+requests~=2.32.5
