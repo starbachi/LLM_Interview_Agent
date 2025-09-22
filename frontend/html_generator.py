@@ -1,4 +1,4 @@
-import time, re, markdown
+import time, re, markdown, math
 from datetime import datetime
 from typing import Dict, Any, Optional
 
@@ -15,6 +15,34 @@ def markdown_to_html(text: str) -> str:
     ])
     
     return md.convert(text)
+
+def calculate_actual_duration(transcript: list) -> int:
+    """Calculate actual interview duration from timestamps and round up to nearest minute."""
+    if not transcript or len(transcript) < 2:
+        return 0
+    
+    # Find first and last timestamps
+    timestamps = []
+    for entry in transcript:
+        timestamp_str = entry.get('timestamp', '')
+        if timestamp_str:
+            try:
+                # Parse ISO format timestamp
+                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                timestamps.append(dt)
+            except Exception:
+                continue
+    
+    if len(timestamps) < 2:
+        # Fallback to entry count estimation if timestamps are invalid
+        return max(1, round(len(transcript) * 2.5))
+    
+    # Calculate duration in minutes
+    duration_seconds = (max(timestamps) - min(timestamps)).total_seconds()
+    duration_minutes = duration_seconds / 60
+    
+    # Round up to nearest minute (ceiling)
+    return max(1, math.ceil(duration_minutes))
 
 def generate_html_report(interview_data: Dict[str, Any], template_path: str = "frontend/interview_report_template.html") -> str:
     """Generate HTML report from interview data"""
@@ -90,6 +118,9 @@ def generate_html_report(interview_data: Dict[str, Any], template_path: str = "f
     elif "don't hire" in recommendation.lower() or "reject" in recommendation.lower():
         rec_class = "recommend-reject"
     
+    # Calculate actual duration from timestamps
+    actual_duration = calculate_actual_duration(transcript)
+    
     # Prepare replacement values
     replacements = {
         '{{position}}': position,
@@ -113,7 +144,7 @@ def generate_html_report(interview_data: Dict[str, Any], template_path: str = "f
         '{{generation_date}}': current_date,
         '{{total_questions}}': str(len([t for t in transcript if t.get('type') == 'question'])),
         '{{interview_id}}': f"INT_{int(time.time())}",
-        '{{duration}}': str(round(len(transcript) * 2.5))  # Estimate duration
+        '{{duration}}': str(actual_duration)  # Use actual calculated duration
     }
     
     # Apply replacements
