@@ -1,10 +1,7 @@
-import json
-import logging
-import time
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+import json, logging, yaml, requests, re
 
-import requests
+from typing import Dict, Any, List, Optional
+
 from config_manager import config
 
 logger = logging.getLogger("ai_interviewer")
@@ -14,8 +11,12 @@ handler.setFormatter(logging.Formatter(config.get("logging.format", "%(asctime)s
 if not logger.handlers:
     logger.addHandler(handler)
 
+# Load YAML of the prompts
+with open("configs/prompts.yaml", "r") as f:
+    prompts = yaml.safe_load(f)
+
 class AIInterviewer:
-    """AI-powered interviewer using NVIDIA NIM Qwen3 80B model."""
+    """AI-powered interviewer using NVIDIA NIM Llama 4 Maverick model."""
     
     def __init__(self, interview_config: Dict[str, Any]):
         """
@@ -25,10 +26,10 @@ class AIInterviewer:
             interview_config: Configuration for the interview
         """
         self.config = interview_config
-        self.conversation_history: List[Dict[str, str]] = []
+        self.conversation_history: List[Dict[str, Optional[str]]] = []
         self.questions_asked = 0
-        self.max_questions = interview_config.get('question_count', 5)
-        self.focus_areas = interview_config.get('focus_areas', ['technical_skills', 'communication'])
+        self.max_questions = interview_config.get('question_count', 10)
+        
         self.user_responses: List[str] = []
         
         # Load NVIDIA API configuration
@@ -37,6 +38,68 @@ class AIInterviewer:
         
         logger.info(f"AI Interviewer initialized for position: {self.config.get('position', 'Unknown')}")
     
+    def __prepare_yaml_entry(self, entry_key: str, **extra_vars) -> str:
+        """
+        Takes a YAML entry key and substitutes placeholders
+        with values from global config + optional extra variables.
+        """
+        if entry_key not in prompts:
+            raise KeyError(f"Entry '{entry_key}' not found in prompts.yaml")
+    
+        template = prompts[entry_key]
+    
+        # --- Replace {config.get('key', 'default')} ---
+        def repl_config(match):
+            key = match.group(1)
+            default = match.group(2) if match.group(2) else ''
+            return str(self.config.get(key, default))
+    
+        template = re.sub(
+            r"\{config\.get\('([^']+)'(?:,\s*'([^']*)')?\)\}",
+            repl_config,
+            template,
+        )
+    
+        # --- Replace {', '.join(config.get('list_key', []))} ---
+        def repl_list(match):
+            key = match.group(1)
+            value = self.config.get(key, [])
+            if isinstance(value, list):
+                return ", ".join(value)
+            return str(value)
+    
+        template = re.sub(
+            r"\{', '\.join\(config\.get\('([^']+)', \[\]\)\)\}",
+            repl_list,
+            template,
+        )
+        
+        def repl_simple_config(match):
+            key = match.group(1)
+            value = self.config.get(key, '')
+            if isinstance(value, list):
+                return ", ".join(value)
+            return str(value)
+        
+        template = re.sub(
+            r"\{config\.get\('([^']+)'\)\}",
+            repl_simple_config,
+            template,
+        )
+    
+        # --- Replace any extra variables {var} ---
+        for k, v in extra_vars.items():
+            template = template.replace(f"{{{k}}}", str(v))
+    
+        return template
+    
+    def __conversation_history_handler(self, role: str, content: str, type: str):
+            self.conversation_history.append({
+                "role": role,
+                "content": content,
+                "type": type,
+            })
+
     def _load_nvidia_api_key(self) -> str:
         """Load NVIDIA API key from environment file."""
         import os
@@ -53,7 +116,7 @@ class AIInterviewer:
         logger.error("NVIDIA API key not found")
         raise RuntimeError("NVIDIA_API_KEY not set in api/api.env")
     
-    def _call_nvidia_api(self, messages: List[Dict[str, str]], max_tokens: int = 1000) -> Optional[str]:
+    def _call_nvidia_api(self, message: List[Dict[str, str]], max_tokens: int = 500) -> Optional[str]:
         """
         Call NVIDIA NIM API with the given messages.
         
@@ -70,16 +133,17 @@ class AIInterviewer:
         }
         
         payload = {
-            "model": "meta/llama-3.1-405b-instruct",
-            "messages": messages,
+            "model": "meta/llama-4-maverick-17b-128e-instruct",
+            "messages": message,
             "max_tokens": max_tokens,
-            "temperature": 0.7,
+            "temperature": 0.1,
             "top_p": 0.9,
             "stream": False
         }
         
+        
         try:
-            logger.debug(f"Calling NVIDIA API with {len(messages)} messages")
+            logger.debug(f"Calling NVIDIA API with {len(message)} messages")
             response = requests.post(
                 f"{self.base_url}/chat/completions",
                 headers=headers,
@@ -109,39 +173,27 @@ class AIInterviewer:
     
     def get_introduction(self) -> str:
         """Generate the interview introduction."""
-        system_prompt = f"""You are an AI interviewer conducting a professional job interview. 
 
-Job Details:
-- Position: {self.config.get('position', 'Not specified')}
-- Company: {self.config.get('company', 'Not specified')}
-- Required Skills: {', '.join(self.config.get('required_skills', []))}
-- Focus Areas: {', '.join(self.focus_areas)}
+        # Get the prompt template from yaml
+        system_prompt = self.__prepare_yaml_entry("introduction_prompt")
+        user_prompt = self.__prepare_yaml_entry("introduction_prompt_user")
 
-Generate a brief, professional introduction (2-3 sentences maximum) that:
-1. Introduces yourself as the AI interviewer
-2. Briefly explains the interview structure and purpose
-3. Sounds natural and welcoming
-
-Keep it concise and professional."""
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": "Please provide the interview introduction."}
-        ]
+        # Prepare message for NVIDIA API
+        message = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
         
-        introduction = self._call_nvidia_api(messages, max_tokens=200)
+        # Call NVIDIA API
+        introduction = self._call_nvidia_api(message, max_tokens=200)
         
+        # If API returned a valid introduction, use it
         if introduction:
-            self.conversation_history.append({
-                "role": "assistant", 
-                "content": introduction,
-                "type": "introduction"
-            })
+            self.__conversation_history_handler("assistant", introduction, "introduction")
+            logger.info(f"Generated introduction: {introduction[:20]}...")  
             return introduction
         else:
-            # Fallback introduction
-            fallback = f"Hello! I'm your AI interviewer for the {self.config.get('position', 'position')} role at {self.config.get('company', 'our company')}. I'll be asking you {self.max_questions} questions to assess your qualifications and fit for this role. Let's begin!"
-            logger.warning("Using fallback introduction due to API failure")
+            # Else, use fallback introduction
+            fallback = self.__prepare_yaml_entry("fallback_introduction")
+            self.__conversation_history_handler("assistant", fallback, "introduction")
+            logger.warning(f"Using fallback introduction due to API failure: {fallback[:20]}...")
             return fallback
     
     def get_next_question(self) -> Optional[str]:
@@ -149,65 +201,44 @@ Keep it concise and professional."""
         if self.questions_asked >= self.max_questions:
             logger.info("Maximum questions reached, ending interview")
             return None
+
+        # Get prompt template from yaml
+        system_prompt = self.__prepare_yaml_entry("question_generation", 
+                                                    questions_asked=self.questions_asked, 
+                                                    max_questions=self.max_questions, 
+                                                    conversation_context=self._get_conversation_context())
+
+        user_prompt = self.__prepare_yaml_entry("question_generation_user")
+
+        # Prepare message for NVIDIA API
+        message = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
         
-        # Determine focus area for this question
-        focus_index = self.questions_asked % len(self.focus_areas)
-        current_focus = self.focus_areas[focus_index]
+        # Call NVIDIA API
+        question = self._call_nvidia_api(message, max_tokens=300)
         
-        system_prompt = f"""You are conducting a professional job interview for the following position:
-
-Job Details:
-- Position: {self.config.get('position', 'Not specified')}
-- Company: {self.config.get('company', 'Not specified')}
-- Job Description: {self.config.get('job_description', 'Not provided')}
-- Required Skills: {', '.join(self.config.get('required_skills', []))}
-
-Current Question Focus: {current_focus}
-Question Number: {self.questions_asked + 1} of {self.max_questions}
-
-Previous conversation context:
-{self._get_conversation_context()}
-
-Generate a single, clear, and relevant interview question that:
-1. Focuses on the current area: {current_focus}
-2. Is appropriate for the job level and requirements
-3. Encourages detailed responses
-4. Sounds natural and conversational
-5. Is different from previously asked questions
-
-Provide ONLY the question, no additional text or formatting."""
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": "Generate the next interview question."}
-        ]
-        
-        question = self._call_nvidia_api(messages, max_tokens=300)
-        
+        # If API returned a valid question, use it
         if question:
             question = question.strip()
-            self.conversation_history.append({
-                "role": "assistant",
-                "content": question,
-                "type": "question",
-                "focus_area": current_focus
-            })
+            self.__conversation_history_handler("assistant", question, "question")
             self.questions_asked += 1
-            logger.info(f"Generated question {self.questions_asked}: {question[:50]}...")
+            logger.info(f"Generated question {self.questions_asked}: {question[:20]}...")
             return question
         else:
-            # Fallback question based on focus area
-            fallback_questions = {
-                'technical_skills': f"Can you describe your experience with {', '.join(self.config.get('required_skills', ['the required technologies'])[:2])}?",
-                'problem_solving': "Can you walk me through how you approach solving complex technical problems?",
-                'communication': "How do you ensure effective communication when working with team members from different technical backgrounds?",
-                'experience': "Tell me about a challenging project you've worked on and how you overcame the difficulties.",
-                'motivation': f"What interests you most about this {self.config.get('position', 'position')} role?"
-            }
+            # Ensure we don't go beyond available fallback questions (1-10)
+            fallback_index = min(self.questions_asked + 1, 10)
+            which_fallback_question = f"fallback_question_{fallback_index}"
             
-            fallback = fallback_questions.get(current_focus, "Can you tell me more about your background and experience?")
-            logger.warning(f"Using fallback question for {current_focus}")
-            return fallback
+            try:
+                fallback_question = self.__prepare_yaml_entry(which_fallback_question)
+            except KeyError:
+                # If we run out of fallback questions, use a generic one
+                fallback_question = "Can you tell me more about your experience and qualifications for this role?"
+                logger.warning(f"No fallback question available for index {fallback_index}, using generic question")
+            
+            self.__conversation_history_handler("assistant", fallback_question, "question")
+            self.questions_asked += 1
+            logger.warning(f"Using fallback question")
+            return fallback_question
     
     def process_answer(self, answer: str) -> None:
         """
@@ -217,17 +248,13 @@ Provide ONLY the question, no additional text or formatting."""
             answer: User's response to the current question
         """
         if answer and answer.strip():
-            self.conversation_history.append({
-                "role": "user",
-                "content": answer.strip(),
-                "type": "answer"
-            })
             self.user_responses.append(answer.strip())
+            self.__conversation_history_handler("user", answer.strip(), "answer")
             logger.info(f"Processed user answer: {len(answer)} characters")
         else:
             logger.warning("Empty or invalid answer received")
     
-    def rephrase_question(self, original_question: str) -> Optional[str]:
+    def rephrase_question(self, original_question: str) -> str:
         """
         Rephrase the current question to make it simpler or clearer.
         
@@ -237,32 +264,20 @@ Provide ONLY the question, no additional text or formatting."""
         Returns:
             Rephrased question or None if failed
         """
-        system_prompt = f"""You are an AI interviewer. The candidate has asked you to rephrase the current question.
+        # Get the prompt template from yaml
+        system_prompt = self.__prepare_yaml_entry("rephrase_question", original_question = original_question)
+        user_prompt = self.__prepare_yaml_entry("rephrase_question_user", original_question = original_question)
 
-Original question: "{original_question}"
-
-Job context:
-- Position: {self.config.get('position', 'Not specified')}
-- Required Skills: {', '.join(self.config.get('required_skills', []))}
-
-Please rephrase this question to be:
-1. Simpler and clearer
-2. More conversational
-3. Easier to understand
-4. Focused on the same core topic
-
-Provide ONLY the rephrased question, no additional text."""
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": "Please rephrase the question."}
-        ]
+        # Prepare message for NVIDIA API
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
         
+        # Call NVIDIA API
         rephrased = self._call_nvidia_api(messages, max_tokens=200)
         
+        # If API returned a valid rephrased question, use it
         if rephrased:
             rephrased = rephrased.strip()
-            logger.info(f"Rephrased question: {rephrased[:50]}...")
+            logger.info(f"Rephrased question: {rephrased[:20]}...")
             return rephrased
         else:
             logger.warning("Failed to rephrase question, returning original")
@@ -274,72 +289,26 @@ Provide ONLY the rephrased question, no additional text."""
             logger.warning("No user responses to summarize")
             return "No responses were recorded during the interview."
         
-        system_prompt = f"""You are an expert HR interviewer analyzing an interview. Provide a comprehensive evaluation based on the following:
+        # Get the prompt template from yaml
+        system_prompt = self.__prepare_yaml_entry("summarise_interview", 
+                                                  questions_asked = self.questions_asked,
+                                                  conversation_context=self._get_full_conversation_context())
 
-Job Details:
-- Position: {self.config.get('position', 'Not specified')}
-- Company: {self.config.get('company', 'Not specified')}
-- Job Description: {self.config.get('job_description', 'Not provided')}
-- Required Skills: {', '.join(self.config.get('required_skills', []))}
-- Focus Areas: {', '.join(self.focus_areas)}
-
-Interview Conversation:
-{self._get_full_conversation_context()}
-
-Please provide a structured evaluation including:
-
-1. Overall Score: X/10
-2. Recommendation: (Hire/Don't Hire/Further Review)
-
-Technical Skills:
-[Detailed assessment of technical competencies mentioned]
-
-Communication:
-[Assessment of communication skills and clarity]
-
-Strengths:
-- [List key strengths demonstrated]
-
-Areas for improvement:
-- [List areas that need development]
-
-Summary:
-[2-3 paragraph summary of the candidate's performance and fit for the role]
-
-Be specific, objective, and provide actionable feedback. Base your assessment only on what was discussed in the interview."""
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": "Please provide the interview evaluation."}
-        ]
+        user_prompt = self.__prepare_yaml_entry("summarise_interview_user",
+                                                conversation_context=self._get_full_conversation_context())
+        # Prepare message for NVIDIA API        
+        message = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
         
-        summary = self._call_nvidia_api(messages, max_tokens=1500)
+        # Call NVIDIA API        
+        summary = self._call_nvidia_api(message, max_tokens=1500)
         
+        # If API returned a valid summary, use it
         if summary:
             logger.info(f"Generated interview summary: {len(summary)} characters")
             return summary
         else:
-            # Fallback summary
-            fallback = f"""Interview Summary for {self.config.get('position', 'Position')}
-
-Overall Score: 6/10
-Recommendation: Further Review
-
-The candidate participated in a {self.questions_asked}-question interview covering {', '.join(self.focus_areas)}. 
-
-Technical Skills: Assessment could not be completed due to technical issues.
-Communication: The candidate was able to respond to questions during the interview.
-
-Strengths:
-- Participated in the full interview process
-- Provided responses to all questions
-
-Areas for improvement:
-- Detailed technical assessment needed
-- Further evaluation recommended
-
-Summary: The interview was completed but requires manual review due to technical limitations in the AI evaluation system. Please review the full transcript for detailed assessment."""
-            
+            # Else, use fallback summary
+            fallback = self.__prepare_yaml_entry("fallback_summary")
             logger.warning("Using fallback summary due to API failure")
             return fallback
     
@@ -349,10 +318,20 @@ Summary: The interview was completed but requires manual review due to technical
         context_parts = []
         
         for entry in recent_entries:
-            if entry.get('type') == 'question':
-                context_parts.append(f"Previous Question: {entry['content']}")
-            elif entry.get('type') == 'answer':
-                context_parts.append(f"Candidate Response: {entry['content'][:200]}...")
+            entry_type = entry.get('type')
+            content = entry.get('content')
+            
+            if entry_type == 'question':
+                # Ensure we never try to slice a None; provide a placeholder if missing
+                content_text = content if isinstance(content, str) and content else "[No question text]"
+                context_parts.append(f"Previous Question: {content_text}")
+            elif entry_type == 'answer':
+                # Safely handle None/non-string and truncate long answers
+                if isinstance(content, str) and content:
+                    snippet = content[:200] + ("..." if len(content) > 200 else "")
+                else:
+                    snippet = "[No response]"
+                context_parts.append(f"Candidate Response: {snippet}")
         
         return '\n'.join(context_parts)
     
@@ -361,9 +340,13 @@ Summary: The interview was completed but requires manual review due to technical
         context_parts = []
         
         for i, entry in enumerate(self.conversation_history):
-            if entry.get('type') == 'question':
-                context_parts.append(f"Question {i//2 + 1}: {entry['content']}")
-            elif entry.get('type') == 'answer':
-                context_parts.append(f"Answer: {entry['content']}")
+            entry_type = entry.get('type')
+            content = entry.get('content')
+            content_text = content if isinstance(content, str) and content else "[No response]"
+            
+            if entry_type == 'question':
+                context_parts.append(f"Question {i//2 + 1}: {content_text}")
+            elif entry_type == 'answer':
+                context_parts.append(f"Answer: {content_text}")
         
         return '\n\n'.join(context_parts)
