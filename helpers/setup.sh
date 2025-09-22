@@ -7,7 +7,7 @@ echo "Setting up AI Interview Assistant..."
 if [[ "$VIRTUAL_ENV" != "" ]]; then
     echo "[OK] - Virtual environment detected: $VIRTUAL_ENV"
 else
-    echo "[ERROR] - No virtual environment detected. Creating one..."
+    echo "[WARNING] - No virtual environment detected. Creating one..."
     python3 -m venv venv
     source venv/bin/activate
     echo "[INFO] - Virtual environment created and activated"
@@ -31,6 +31,7 @@ pip install -r requirements.txt
 
 # Check API configuration
 echo "[INFO] - Checking API configuration..."
+echo "/----------------------------------------/"
 
 if [ -f "api/api.env" ]; then
     source api/api.env
@@ -59,5 +60,4 @@ else
 EOF
     echo "[OK] - Template api/api.env created. Please update with your credentials."
 fi
-
-echo "[INFO] - Run: streamlit run streamlit_app.py"
+echo "[INFO] - If your API credentials are set. Please run: streamlit run streamlit_app.py"
