@@ -62,15 +62,17 @@ An intelligent interview system that conducts automated job interviews using AI,
 
 ## Installation Steps
 
-**0. Update package management**
+**0. Update package management and install FFmpeg**
 
 Debian / Ubuntu / Mint
 ```
 sudo apt-get update
+sudo apt-get install ffmpeg
 ```
 OR
 ```
 sudo apt update
+sudo apt install ffmpeg
 ```
 **1. Clone the repository**
 ```
