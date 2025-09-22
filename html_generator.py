@@ -269,32 +269,53 @@ def extract_list_items(text: str, section_name: str) -> str:
     return f'<li>No specific {section_name.lower()} identified in the assessment.</li>'
 
 def generate_transcript_html(transcript: list) -> str:
-    """Generate HTML for transcript"""
+    """Generate HTML for transcript with timestamps."""
     html_parts = []
     
     for entry in transcript:
         entry_type = entry.get('type', 'unknown')
         content = entry.get('content', '')
+        timestamp = entry.get('timestamp', '')
+        
+        # Format timestamp for display
+        formatted_time = ''
+        if timestamp:
+            try:
+                # Parse ISO format timestamp
+                dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                formatted_time = dt.strftime('%H:%M:%S')
+            except Exception:
+                # Fallback if timestamp parsing fails
+                formatted_time = timestamp[:8] if len(timestamp) > 8 else timestamp
         
         if entry_type == 'greeting':
             html_parts.append(f'''
             <div class="transcript-item greeting">
-                <strong>Interviewer Introduction</strong>
-                {content}
+                <div class="transcript-header">
+                    <strong>Interviewer Introduction</strong>
+                    {f'<span class="timestamp">{formatted_time}</span>' if formatted_time else ''}
+                </div>
+                <div class="transcript-content">{content}</div>
             </div>
             ''')
         elif entry_type == 'question':
             html_parts.append(f'''
             <div class="transcript-item question">
-                <strong>Question</strong>
-                {content}
+                <div class="transcript-header">
+                    <strong>Question</strong>
+                    {f'<span class="timestamp">{formatted_time}</span>' if formatted_time else ''}
+                </div>
+                <div class="transcript-content">{content}</div>
             </div>
             ''')
         elif entry_type == 'answer':
             html_parts.append(f'''
             <div class="transcript-item answer">
-                <strong>Candidate Response</strong>
-                {content}
+                <div class="transcript-header">
+                    <strong>Candidate Response</strong>
+                    {f'<span class="timestamp">{formatted_time}</span>' if formatted_time else ''}
+                </div>
+                <div class="transcript-content">{content}</div>
             </div>
             ''')
     

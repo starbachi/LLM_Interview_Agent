@@ -102,9 +102,42 @@
             border-left: 4px solid #dee2e6;
         }
         
+        .transcript-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .transcript-header strong {
+            color: #555;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .timestamp {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: normal;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .transcript-content {
+            line-height: 1.6;
+        }
+        
         .question {
             background: #e3f2fd;
             border-left-color: #2196f3;
+        }
+        
+        .question .timestamp {
+            background: #bbdefb;
+            color: #0d47a1;
         }
         
         .answer {
@@ -112,18 +145,19 @@
             border-left-color: #4caf50;
         }
         
+        .answer .timestamp {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+        
         .greeting {
             background: #fff3e0;
             border-left-color: #ff9800;
         }
         
-        .transcript-item strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .greeting .timestamp {
+            background: #ffe0b2;
+            color: #e65100;
         }
         
         .recommendation {
@@ -224,6 +258,11 @@
                 display: block;
                 margin: 1rem auto;
                 width: fit-content;
+            }
+            .transcript-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
             }
         }
     </style>
