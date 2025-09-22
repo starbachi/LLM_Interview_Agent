@@ -7,7 +7,7 @@ from typing import Dict, Any
 
 from config_manager import config
 from stt_tts import transcribe_audio_bytes, synthesize_tts
-from html_generator import save_html_report
+from frontend.html_generator import save_html_report
 from ai_interviewer import AIInterviewer
 
 # Configure logging
