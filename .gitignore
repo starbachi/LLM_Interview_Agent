@@ -17,7 +17,7 @@ api.env
 interview_report_*.html
 
 # Interview config file
-interview_config.json
+# interview_config.json
 
 # Keep the template
 !interview_report_template.html

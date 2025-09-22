@@ -1,0 +1,37 @@
+{
+  "position": "Senior AI Engineer",
+  "company": "LunarTech",
+  "department": "Engineering",
+  "level": "Senior",
+  "job_description": "We are seeking a Senior AI Engineer to join our dynamic development team. The ideal candidate will have strong experience in full-stack development, system design, and team collaboration. You will be responsible for developing scalable web applications, mentoring junior developers, and contributing to architectural decisions.",
+  "required_skills": [
+    "Python",
+    "Django",
+    "Machine Tools",
+    "RAG",
+    "SQL",
+    "Computer Vision",
+    "Git",
+    "AWS"
+  ],
+  "interview_duration": 10,
+  "question_count": 8,
+  "evaluation_criteria": {
+    "technical_proficiency": {
+      "weight": 0.4,
+      "description": "Knowledge of required technologies and coding practices"
+    },
+    "problem_solving": {
+      "weight": 0.25,
+      "description": "Ability to analyze and solve complex technical problems"
+    },
+    "communication": {
+      "weight": 0.2,
+      "description": "Clear communication and explanation of technical concepts"
+    },
+    "experience": {
+      "weight": 0.15,
+      "description": "Relevant work experience and project examples"
+    }
+  }
+}
