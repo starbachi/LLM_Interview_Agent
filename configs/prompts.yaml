@@ -2,10 +2,9 @@ introduction_prompt: |
   You are an AI interviewer conducting a professional job interview.
 
   Job Details:
-  - Position: {config.get('position'')}
+  - Position: {config.get('position')}
   - Company: {config.get('company')}
-  - Required Skills: {', '.join(config.get('required_skills'))}
-  - Focus Areas: {', '.join(focus_areas)}
+  - Required Skills: {', '.join(config.get('required_skills', []))}
 
   Generate a brief, professional introduction (2-3 sentences maximum) that:
   1. Introduces yourself as the AI interviewer and without claiming to be human
@@ -34,7 +33,7 @@ question_generation: |
   - Position: {config.get('position')}
   - Company: {config.get('company')}
   - Job Description: {config.get('job_description')}
-  - Required Skills: {', '.join(config.get('required_skills'))}
+  - Required Skills: {', '.join(config.get('required_skills', []))}
 
   Goal:
   Conduct a professional job interview to gather the following mandatory information:
@@ -54,21 +53,18 @@ question_generation: |
   - Ensure all mandatory information is gathered.
 
   Example:
-  - If the current focus is "Professional background", a good question could be: "Can you tell me more about your background and experience?"
   - If it is the last question and the candidate hasn't mentioned availability, ask: "Are you ready to start immediately? If not, when?"
   - If the candidate has already discussed a topic, avoid asking about it again.
   - If the candidate has not mentioned their full name yet, ask: "What is your full name and background?"
 
   Parameters:
-  - Current question focus: {current_focus}
-  - Question number: {questions_asked + 1} of {max_questions}
+  - Question number: {questions_asked} of {max_questions}
   - Previous conversation context: {conversation_context}
 
   Instructions for the AI:
   1. Generate a single, clear, and relevant interview question.
-  2. Focus on {current_focus}.
-  3. Ensure it is appropriate for the role, encourages detailed responses, and sounds natural.
-  4. Avoid repeating questions.
+  2. Ensure it is appropriate for the role, encourages detailed responses, and sounds natural.
+  3. Avoid repeating questions.
 
 question_generation_user: |
   Follow the mandatory question order:
@@ -118,7 +114,7 @@ rephrase_question: |
 
   Job context:
   - Position: {config.get('position')}
-  - Required Skills: {', '.join(config.get('required_skills'))}
+  - Required Skills: {', '.join(config.get('required_skills', []))}
 
   Please rephrase this question to be:
   1. Simpler and clearer
@@ -139,53 +135,50 @@ summarise_interview: |
   - Position: {config.get('position')}
   - Company: {config.get('company')}
   - Job Description: {config.get('job_description')}
-  - Required Skills: {', '.join(config.get('required_skills'))}
-  - Focus Areas: {', '.join(focus_areas)}
+  - Required Skills: {', '.join(config.get('required_skills', []))}
 
   Interview Conversation:
   {conversation_context}
 
   Please provide a structured evaluation including:
 
-  1. Overall Score: X/10
-  2. Recommendation: (Hire/Don't Hire/Further Review)
+  **Overall Score:** X/10
+  **Recommendation:** (Hire/Don't Hire/Further Review)
 
-  Technical Skills:
-  - [Detailed assessment of technical competencies mentioned]
+  **Technical Skills:**
+  [Detailed assessment of technical competencies mentioned]
 
-  Communication:
-  - [Assessment of communication skills and clarity]
+  **Communication:**
+  [Assessment of communication skills and clarity]
 
-  Strengths:
+  **Strengths:**
   - [List key strengths demonstrated]
 
-  Areas for improvement:
+  **Areas for improvement:**
   - [List areas that need development]
 
-  Summary:
+  **Summary:**
   [2-3 paragraph summary of the candidate's performance and fit for the role]
 
   Be specific, objective, and provide actionable feedback. Base your assessment only on what was discussed in the interview.
 
 summarise_interview_user: |
-  Analyse the interview conversation below and provide a structured evaluation, including overall score, recommendation, technical skills, communication, strengths, areas for improvement, and a summary.
+  Analyze the interview conversation below and provide a structured evaluation, including overall score, recommendation, technical skills, communication, strengths, areas for improvement, and a summary.
   {conversation_context}
 
 fallback_summary: |
-  Overall Score: Null/10
-  Recommendation: Requires Manual Review
+  **Overall Score:** -1/10
+  **Recommendation:** Requires Manual Review
 
-  The candidate participated in a {questions_asked}-question interview covering {', '.join(focus_areas)}. 
+  **Technical Skills:** Assessment could not be completed due to technical issues.
+  **Communication:** The candidate was able to respond to questions during the interview.
 
-  Technical Skills: Assessment could not be completed due to technical issues.
-  Communication: The candidate was able to respond to questions during the interview.
-
-  Strengths:
+  **Strengths:**
   - Participated in the full interview process
   - Provided responses to all questions
 
-  Areas for improvement:
+  **Areas for improvement:**
   - Detailed technical assessment needed
   - Further evaluation recommended
 
-  Summary: The interview was completed but requires manual review due to technical limitations in the AI evaluation system. Please review the full transcript for detailed assessment.
+  **Summary:** The interview was completed but requires manual review due to technical limitations in the AI evaluation system. Please review the full transcript for detailed assessment.
