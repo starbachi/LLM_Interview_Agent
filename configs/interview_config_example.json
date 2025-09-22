@@ -1,0 +1,33 @@
+{
+  "position": "<Job Title>",
+  "company": "<Company Name>",
+  "department": "<Department Name>",
+  "level": "<Job Level>",
+  "job_description": "<Brief job description outlining responsibilities and expectations>",
+  "required_skills": [
+    "<Skill 1>",
+    "<Skill 2>",
+    "<Skill 3>",
+    "<Skill 4>"
+  ],
+  "interview_duration": 5,
+  "question_count": 5,
+  "evaluation_criteria": {
+    "technical_proficiency": {
+      "weight": 0.4,
+      "description": "Knowledge of required technologies and coding practices"
+    },
+    "problem_solving": {
+      "weight": 0.25,
+      "description": "Ability to analyze and solve complex technical problems"
+    },
+    "communication": {
+      "weight": 0.2,
+      "description": "Clear communication and explanation of technical concepts"
+    },
+    "experience": {
+      "weight": 0.15,
+      "description": "Relevant work experience and project examples"
+    }
+  }
+}
