@@ -7,4 +7,7 @@ requests~=2.32.5
 streamlit~=1.49.1
 streamlit-audiorecorder~=0.0.6
 PyYAML~=6.0.2
-requests~=2.32.5
+fastapi
+uvicorn
+google-cloud-speech
+google-cloud-texttospeech
