@@ -72,7 +72,8 @@ git clone https://github.com/starbachi/LLM_Interview_Agent
 **2.Run ```setup.sh```**
 ```
 cd "LLM_Interview_Agent"
-bash helpers/setup.sh
+bash helpers/setup_deb.sh   # For Debian
+bash helpers/setup_arch.sh  # For Arch
 ```
 **3. Setup API credentials**
 Inside ```helpers/api/api.env```, place your API keys.
