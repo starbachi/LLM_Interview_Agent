@@ -232,7 +232,7 @@ def main():
     
     # Load custom CSS
     try:
-        with open("html/css/style.css", "r") as f:
+        with open("frontend/style.css", "r") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
         logger.warning("Custom CSS file not found")
