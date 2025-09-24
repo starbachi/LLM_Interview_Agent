@@ -8,7 +8,7 @@ if [[ "$VIRTUAL_ENV" != "" ]]; then
     echo "[OK] - Virtual environment detected: $VIRTUAL_ENV"
 else
     echo "[WARNING] - No virtual environment detected. Creating one..."
-    python3 -m venv venv
+    python3.10 -m venv venv
     echo "[INFO] - Virtual environment created and activated"
 fi
 
